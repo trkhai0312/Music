@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music player</title>
+    <link rel="icon" href="https://creazilla-store.fra1.digitaloceanspaces.com/icons/3196878/headphones-icon-md.png" type="image/x-icon" />
+    <link rel="stylesheet" href="./assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css"
+        integrity="sha512-HK5fgLBL+xu6dm/Ii3z4xhlSUyZgTT9tuc/hSrtw6uzJOvgRr2a9jyxxT1ely+B+xFAmJKVSTbpM/CuL7qxO8w=="
+        crossorigin="anonymous" />
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+</head>
+
+<body>
+    <div class="player">
+        <!-- Dashboard -->
+        <div class="dashboard">
+            <!-- Header -->
+            <header>
+                <h4>Đang Phát:</h4>
+                <h2>String 57th & 9th</h2>
+            </header>
+
+            <!-- CD -->
+            <div class="cd">
+                <div class="cd-thumb"
+                    style="background-image: url('https://i.ytimg.com/vi/jTLhQf5KJSc/maxresdefault.jpg')">
+                </div>
+            </div>
+
+            <!-- Control -->
+            <div class="control">
+                <div class="btn btn-repeat">
+                    <i class="fas fa-redo"></i>
+                </div>
+                <div class="btn btn-prev">
+                    <i class="fas fa-step-backward"></i>
+                </div>
+                <div class="btn btn-toggle-play">
+                    <i class="fas fa-pause icon-pause"></i>
+                    <i class="fas fa-play icon-play"></i>
+                </div>
+                <div class="btn btn-next">
+                    <i class="fas fa-step-forward"></i>
+                </div>
+                <div class="btn btn-random">
+                    <i class="fas fa-random"></i>
+                </div>
+            </div>
+
+            <input id="progress" class="progress" type="range" value="0" step="1" min="0" max="100">
+
+            <audio id="audio" src=""></audio>
+        </div>
+
+        <!-- Playlist -->
+        <div class="playlist">
+            <div class="song">
+                <div class="thumb"
+                    style="background-image: url('https://i.ytimg.com/vi/jTLhQf5KJSc/maxresdefault.jpg')">
+                </div>
+                <div class="body">
+                    <h3 class="title">Music name</h3>
+                    <p class="author">Singer</p>
+                </div>
+                <div class="option">
+                    <i class="fas fa-ellipsis-h"></i>
+                </div>
+            </div>
+            <div class="song">
+                <div class="thumb"
+                    style="background-image: url('https://i.ytimg.com/vi/jTLhQf5KJSc/maxresdefault.jpg')">
+                </div>
+                <div class="body">
+                    <h3 class="title">Music name</h3>
+                    <p class="author">Singer</p>
+                </div>
+                <div class="option">
+                    <i class="fas fa-ellipsis-h"></i>
+                </div>
+            </div>
+            <div class="song">
+                <div class="thumb"
+                    style="background-image: url('https://i.ytimg.com/vi/jTLhQf5KJSc/maxresdefault.jpg')">
+                </div>
+                <div class="body">
+                    <h3 class="title">Music name</h3>
+                    <p class="author">Singer</p>
+                </div>
+                <div class="option">
+                    <i class="fas fa-ellipsis-h"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Một số bài hát có thể bị lỗi do liên kết bị hỏng. Vui lòng thay thế liên kết khác để có thể phát
+        // Some songs may be faulty due to broken links. Please replace another link so that it can be played
+
+        const $ = document.querySelector.bind(document);
+        const $$ = document.querySelectorAll.bind(document);
+
+        const PlAYER_STORAGE_KEY = "F8_PLAYER";
+
+        const player = $(".player");
+        const cd = $(".cd");
+        const heading = $("header h2");
+        const cdThumb = $(".cd-thumb");
+        const audio = $("#audio");
+        const playBtn = $(".btn-toggle-play");
+        const progress = $("#progress");
+        const prevBtn = $(".btn-prev");
+        const nextBtn = $(".btn-next");
+        const randomBtn = $(".btn-random");
+        const repeatBtn = $(".btn-repeat");
+        const playlist = $(".playlist");
+
+        const app = {
+            currentIndex: 0,
+            isPlaying: false,
+             isRandom: false,
+            isRepeat: false,
+            config: {},
+            // (1/2) Uncomment the line below to use localStorage
+            // config: JSON.parse(localStorage.getItem(PlAYER_STORAGE_KEY)) || {},
+            songs: [
+                {
+                    name: "HopeLess - Dewie",
+                    singer: "Dewie",
+                    path: './assets/music/song1.mp3',
+                    image: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/d6/21/91/d62191e4-774b-65ef-46e1-2277d8994f4a/artwork.jpg/1200x1200bf-60.jpg"
+                },
+                {
+                    name: "Rồi Một Ngày - Dewie",
+                    singer: "Dewie",
+                    path: './assets/music/song2.mp4',
+                    image:"https://images.genius.com/c7af74e6c1309087dd583c4864570773.1000x1000x1.jpg"
+                },
+                {
+                    name: "Tiếc Làm Gì?",
+                    singer: "Parys",
+                    path:'./assets/music/song3.mp4',
+                     image: "https://avatar-ex-swe.nixcdn.com/song/2022/12/14/5/b/1/b/1671005657446_640.jpg"
+                },
+                {
+                    name: "Yêu Kiều",
+                    singer: "Parys",
+                    path:'./assets/music/song4.mp4',                    
+                    image: "https://photo-resize-zmp3.zmdcdn.me/w256_r1x1_jpeg/cover/d/f/d/b/dfdb9073a541fae2ddaf30a772be78e5.jpg"
+                },
+                {
+                    name: "Lying to myself",
+                    singer: "Dab",
+                    path:'./assets/music/song5.mp4',                    
+                    image:
+                        "https://i1.sndcdn.com/artworks-YBk7UyLp37NW3uLp-R8cC3A-t500x500.jpg"
+                },
+                {
+                    name: "Shake It",
+                    singer: "NLE Choppa x RussMillions.",
+                    path:'./assets/music/song6.mp4',                    
+                    image:"data:image/jpeg;base64,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"
+                },
+                {
+                    name: "Nếu Lúc Đó",
+                    singer: "Tlinh",
+                    path:'./assets/music/song7.mp4',
+                    image:
+                        "https://bloganchoi.com/wp-content/uploads/2023/03/untitled-1.jpg"
+                },
+                {
+                    name: "2h",
+                    singer: "MCK",
+                    path:'./assets/music/song8.mp4',
+                    image:
+                        "https://avatar-ex-swe.nixcdn.com/song/2023/07/26/1/0/8/1/1690371801045_640.jpg"
+                },
+                {
+                    name: "Em Ơi ! Amor Vincit Omnia",
+                    singer: "MCK",
+                    path:'./assets/music/song9.mp4',
+                    image:
+                        "https://i.ytimg.com/vi/jlD57SWtYqQ/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLDMnClQKAGqxu6qPwIj5i7O_pmjdQ"
+                },
+                {
+                    name: "My All",
+                    singer: "Larissa Lambert",
+                    path:'./assets/music/song10.mp4',
+                    image:
+                        "https://bizweb.dktcdn.net/thumb/1024x1024/100/438/626/products/dfbd9d26-2785-4c0d-b069-e5d8c10f337e.jpg?v=1686145464463"
+                }
+            ],
+            setConfig: function (key, value) {
+                this.config[key] = value;
+                // (2/2) Uncomment the line below to use localStorage
+                // localStorage.setItem(PlAYER_STORAGE_KEY, JSON.stringify(this.config));
+            },
+            render: function () {
+                const htmls = this.songs.map((song, index) => {
+                    return `
+                        <div class="song ${index === this.currentIndex ? "active" : ""
+                        }" data-index="${index}">
+                            <div class="thumb"
+                                style="background-image: url('${song.image}')">
+                            </div>
+                            <div class="body">
+                                <h3 class="title">${song.name}</h3>
+                                <p class="author">${song.singer}</p>
+                            </div>
+                            <div class="option">
+                                <i class="fas fa-ellipsis-h"></i>
+                            </div>
+                        </div>
+                    `;
+                });
+                playlist.innerHTML = htmls.join("");
+            },
+            defineProperties: function () {
+                Object.defineProperty(this, "currentSong", {
+                    get: function () {
+                        return this.songs[this.currentIndex];
+                    }
+                });
+            },
+            handleEvents: function () {
+                const _this = this;
+                const cdWidth = cd.offsetWidth;
+
+                // Xử lý CD quay / dừng
+                // Handle CD spins / stops
+                const cdThumbAnimate = cdThumb.animate([{ transform: "rotate(360deg)" }], {
+                    duration: 10000, // 10 seconds
+                    iterations: Infinity
+                });
+                cdThumbAnimate.pause();
+
+                // Xử lý phóng to / thu nhỏ CD
+                // Handles CD enlargement / reduction
+                document.onscroll = function () {
+                    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+                    const newCdWidth = cdWidth - scrollTop;
+
+                    cd.style.width = newCdWidth > 0 ? newCdWidth + "px" : 0;
+                    cd.style.opacity = newCdWidth / cdWidth;
+                };
+
+                // Xử lý khi click play
+                // Handle when click play
+                playBtn.onclick = function () {
+                    if (_this.isPlaying) {
+                        audio.pause();
+                    } else {
+                        audio.play();
+                    }
+                };
+
+                // Khi song được play
+                // When the song is played
+                audio.onplay = function () {
+                    _this.isPlaying = true;
+                    player.classList.add("playing");
+                    cdThumbAnimate.play();
+                };
+
+                // Khi song bị pause
+                // When the song is pause
+                audio.onpause = function () {
+                    _this.isPlaying = false;
+                    player.classList.remove("playing");
+                    cdThumbAnimate.pause();
+                };
+
+                // Khi tiến độ bài hát thay đổi
+                // When the song progress changes
+                audio.ontimeupdate = function () {
+                    if (audio.duration) {
+                        const progressPercent = Math.floor(
+                            (audio.currentTime / audio.duration) * 100
+                        );
+                        progress.value = progressPercent;
+                    }
+                };
+
+                // Xử lý khi tua song
+                // Handling when seek
+                progress.onchange = function (e) {
+                    const seekTime = (audio.duration / 100) * e.target.value;
+                    audio.currentTime = seekTime;
+                };
+
+                // Khi next song
+                // When next song
+                nextBtn.onclick = function () {
+                    if (_this.isRandom) {
+                        _this.playRandomSong();
+                    } else {
+                        _this.nextSong();
+                    }
+                    audio.play();
+                    _this.render();
+                    _this.scrollToActiveSong();
+                };
+
+                // Khi prev song
+                // When prev song
+                prevBtn.onclick = function () {
+                    if (_this.isRandom) {
+                        _this.playRandomSong();
+                    } else {
+                        _this.prevSong();
+                    }
+                    audio.play();
+                    _this.render();
+                    _this.scrollToActiveSong();
+                };
+
+                // Xử lý bật / tắt random song
+                // Handling on / off random song
+                randomBtn.onclick = function (e) {
+                    _this.isRandom = !_this.isRandom;
+                    _this.setConfig("isRandom", _this.isRandom);
+                    randomBtn.classList.toggle("active", _this.isRandom);
+                };
+
+                // Xử lý lặp lại một song
+                // Single-parallel repeat processing
+                repeatBtn.onclick = function (e) {
+                    _this.isRepeat = !_this.isRepeat;
+                    _this.setConfig("isRepeat", _this.isRepeat);
+                    repeatBtn.classList.toggle("active", _this.isRepeat);
+                };
+
+                // Xử lý next song khi audio ended
+                // Handle next song when audio ended
+                audio.onended = function () {
+                    if (_this.isRepeat) {
+                        audio.play();
+                    } else {
+                        nextBtn.click();
+                    }
+                };
+
+                // Lắng nghe hành vi click vào playlist
+                // Listen to playlist clicks
+                playlist.onclick = function (e) {
+                    const songNode = e.target.closest(".song:not(.active)");
+
+                    if (songNode || e.target.closest(".option")) {
+                        // Xử lý khi click vào song
+                        // Handle when clicking on the song
+                        if (songNode) {
+                            _this.currentIndex = Number(songNode.dataset.index);
+                            _this.loadCurrentSong();
+                            _this.render();
+                            audio.play();
+                        }
+
+                        // Xử lý khi click vào song option
+                        // Handle when clicking on the song option
+                        if (e.target.closest(".option")) {
+                        }
+                    }
+                };
+            },
+            scrollToActiveSong: function () {
+                setTimeout(() => {
+                    $(".song.active").scrollIntoView({
+                        behavior: "smooth",
+                        block: "nearest"
+                    });
+                }, 300);
+            },
+            loadCurrentSong: function () {
+                heading.textContent = this.currentSong.name;
+                cdThumb.style.backgroundImage = `url('${this.currentSong.image}')`;
+                audio.src = this.currentSong.path;
+            },
+            loadConfig: function () {
+                this.isRandom = this.config.isRandom;
+                this.isRepeat = this.config.isRepeat;
+            },
+            nextSong: function () {
+                this.currentIndex++;
+                if (this.currentIndex >= this.songs.length) {
+                    this.currentIndex = 0;
+                }
+                this.loadCurrentSong();
+            },
+            prevSong: function () {
+                this.currentIndex--;
+                if (this.currentIndex < 0) {
+                    this.currentIndex = this.songs.length - 1;
+                }
+                this.loadCurrentSong();
+            },
+            playRandomSong: function () {
+                let newIndex;
+                do {
+                    newIndex = Math.floor(Math.random() * this.songs.length);
+                } while (newIndex === this.currentIndex);
+
+                this.currentIndex = newIndex;
+                this.loadCurrentSong();
+            },
+            start: function () {
+                // Gán cấu hình từ config vào ứng dụng
+                // Assign configuration from config to application
+                this.loadConfig();
+
+                // Định nghĩa các thuộc tính cho object
+                // Defines properties for the object
+                this.defineProperties();
+
+                // Lắng nghe / xử lý các sự kiện (DOM events)
+                // Listening / handling events (DOM events)
+                this.handleEvents();
+
+                // Tải thông tin bài hát đầu tiên vào UI khi chạy ứng dụng
+                // Load the first song information into the UI when running the app
+                this.loadCurrentSong();
+
+                // Render playlist
+                this.render();
+
+                // Hiển thị trạng thái ban đầu của button repeat & random
+                // Display the initial state of the repeat & random button
+                randomBtn.classList.toggle("active", this.isRandom);
+                repeatBtn.classList.toggle("active", this.isRepeat);
+            }
+        };
+
+        app.start();
+
+    </script>
+</body>
+
+</html>
