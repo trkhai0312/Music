@@ -114,7 +114,7 @@
   .progress {
     
     width: 100%;
-    /* -webkit-appearance: none; */
+    -webkit-appearance: none;
     height: 8px;
     background: #d3d3d3;
     outline: none;
